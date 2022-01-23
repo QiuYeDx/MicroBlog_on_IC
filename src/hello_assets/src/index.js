@@ -26,7 +26,6 @@ async function load_posts(){
     posts = await hello.posts_by_id(flag);
   }
   if(num_posts == posts.length && flag == flag_last) return;
-  flag_last = flag;
   posts_section.replaceChildren([]);
   num_posts = posts.length;
   let head = document.createElement("tr");
@@ -60,6 +59,7 @@ async function load_posts(){
     post.appendChild(td_3);
     posts_section.appendChild(post);
   }
+  flag_last = flag;
 }
 var num_follows = 0;
 async function load_follows(){
@@ -103,7 +103,7 @@ function load(){
   };
   load_posts();
   load_follows();
-  setInterval(load_posts, 5000);
+  // setInterval(load_posts, 5000);
   setInterval(load_follows, 10000);
 }
 

@@ -93,6 +93,43 @@ async function load_follows(){
   }
 }
 
+var num_all = 0;
+async function load_all(){
+  let posts_section = document.getElementById("all");
+  let posts;
+  posts = await hello.timeline();
+  if(num_all == posts.length) return;
+  posts_section.replaceChildren([]);
+  num_all = posts.length;
+  let head = document.createElement("tr");
+  let th_1 = document.createElement("th");
+  th_1.setAttribute("style", "text-align: center");
+  th_1.innerHTML = "New Post";
+  let th_2 = document.createElement("th");
+  th_2.setAttribute("style", "text-align: center");
+  th_2.innerHTML = "Time";
+  let th_3 = document.createElement("th");
+  th_3.setAttribute("style", "text-align: center");
+  th_3.innerHTML = "Author";
+  head.appendChild(th_1);
+  head.appendChild(th_2);
+  head.appendChild(th_3);
+  posts_section.appendChild(head);
+  for(var i=0;i<posts.length;i++){
+    let post = document.createElement("tr");
+    let td_1 = document.createElement("td");
+    td_1.innerHTML = posts[i].content;
+    let td_2 = document.createElement("td");
+    td_2.innerHTML = formatDate(Number(posts[i].time)/ 1000000);
+    let td_3 = document.createElement("td");
+    td_3.innerHTML = posts[i].author;
+    post.appendChild(td_1);
+    post.appendChild(td_2);
+    post.appendChild(td_3);
+    posts_section.appendChild(post);
+  }
+}
+
 function load(){
   let post_button = document.getElementById("post");
   post_button.onclick = post;
@@ -102,8 +139,9 @@ function load(){
     load_posts();
   };
   load_posts();
+  load_all();
   load_follows();
-  // setInterval(load_posts, 5000);
+  setInterval(load_all, 6000);
   setInterval(load_follows, 10000);
 }
 

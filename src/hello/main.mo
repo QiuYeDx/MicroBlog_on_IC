@@ -2,8 +2,13 @@ import List "mo:base/List";
 import Principal "mo:base/Principal";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
+import Array "mo:base/Array";
+import Order "mo:base/Order";
 
 actor {
+    private var order_s : Order.Order = #less;
+    private var order_m : Order.Order = #equal;
+    private var order_l : Order.Order = #greater;
     private type Time = Time.Time;
     private type Message = {
         content: Text;
@@ -86,7 +91,16 @@ actor {
             let msgs = await canister.posts();
             all := List.append(all, List.fromArray(msgs));
         };
-        List.toArray(all)
+        var last = List.toArray(all);
+        Array.sort<Message>(last, func(a: Message, b: Message){
+            if(a.time > b.time){
+                return order_s;
+            };
+            if(a.time < b.time){
+                return order_l;
+            };
+            return order_m;
+        })
     };
 
 };

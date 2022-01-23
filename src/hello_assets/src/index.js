@@ -1,5 +1,9 @@
 import { hello } from "../../declarations/hello";
 
+var flag = "myself";
+var flag_name = "";
+let follows;
+
 async function post(){
   let post_button = document.getElementById("post");
   post_button.disabled = true;
@@ -8,18 +12,28 @@ async function post(){
   await hello.post(text);
   post_button.disabled = false;
   textarea.value = "";
+  flag = "myself";
 }
 var num_posts = 0;
 async function load_posts(){
   let posts_section = document.getElementById("posts");
-  let posts = await hello.posts();
+  let posts;
+  if(flag == "myself"){
+    posts = await hello.posts();
+  }else{
+    posts = await hello.posts_by_id(flag);
+  }
   if(num_posts == posts.length) return;
   posts_section.replaceChildren([]);
   num_posts = posts.length;
   let head = document.createElement("tr");
   let th_1 = document.createElement("th");
   th_1.setAttribute("style", "text-align: center");
-  th_1.innerHTML = "Post";
+  if(flag == "myself"){
+    th_1.innerHTML = "My Post";
+  }else{
+    th_1.innerHTML = flag_name + "'s Post";
+  }
   let th_2 = document.createElement("th");
   th_2.setAttribute("style", "text-align: center");
   th_2.innerHTML = "Time";
@@ -44,12 +58,48 @@ async function load_posts(){
     posts_section.appendChild(post);
   }
 }
+var num_follows = 0;
+async function load_follows(){
+  let follows_section = document.getElementById("follows");
+  follows = await hello.follows();
+  if(num_follows == follows.length) return;
+  follows_section.replaceChildren([]);
+  num_follows = follows.length;
+  let head = document.createElement("tr");
+  let th_1 = document.createElement("th");
+  th_1.setAttribute("style", "text-align: center");
+  th_1.innerHTML = "Poster You Followed";
+  head.appendChild(th_1);
+  follows_section.appendChild(head);
+  for(var i=0;i<follows.length;i++){
+    let poster = document.createElement("tr");
+    let td_1 = document.createElement("td");
+    td_1.setAttribute("style", "text-align: center");
+    let btn = document.createElement("button");
+    btn.setAttribute("style", "text-align: center");
+    btn.setAttribute("i",i);
+    btn.innerHTML = follows[i].name;
+    btn.onclick = () => {
+      flag = follows[btn.getAttribute("i")].principal;
+      flag_name = follows[btn.getAttribute("i")].name;
+    };
+    td_1.appendChild(btn);
+    poster.appendChild(td_1);
+    follows_section.appendChild(poster);
+  }
+}
 
 function load(){
   let post_button = document.getElementById("post");
   post_button.onclick = post;
+  let home_btn = document.getElementById("home");
+  home_btn.onclick = ()=>{
+    flag = "myself";
+  };
   load_posts();
+  load_follows();
   setInterval(load_posts, 2500);
+  setInterval(load_follows, 4000);
 }
 
 window.onload = load;

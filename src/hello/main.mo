@@ -10,9 +10,13 @@ actor {
         time: Time;
         author: Text;
     };
+    private type Poster = {
+        principal: Text;
+        name: Text;
+    };
     private type MyBlog = actor{
         follow: shared (Principal) -> async ();
-        follows: shared query() -> async [Principal];
+        follows: shared query () -> async [Poster];
         post: shared (Text) -> async ();
         posts: shared query () -> async [Message];
         timeline: shared () -> async [Message];
@@ -20,7 +24,7 @@ actor {
         get_name: shared () -> async ?Text;
     };
 
-    stable var followed : List.List<Principal> = List.nil();
+    stable var followed : List.List<Poster> = List.nil();
     stable var messages : List.List<Message> = List.nil();
     stable var myName : Text = "[nameless!]";
 
@@ -32,11 +36,26 @@ actor {
         return ?myName;
     };
     
-    public shared func follow(id: Principal) : async (){
-        followed := List.push(id, followed);
+    public shared func follow(id: Text) : async (){
+        let canister : MyBlog = actor(id);
+        switch(await canister.get_name()){
+            case(?_name){
+                followed := List.push({
+                    principal = id;
+                    name = _name;
+                }, followed);
+            };
+            case(_){
+                followed := List.push({
+                    principal = id;
+                    name = "[no name]";
+                }, followed);
+            };
+        };
+        
     };
     
-    public shared query func follows() : async [Principal]{
+    public shared query func follows() : async [Poster]{
         List.toArray(followed)
     };
 
@@ -55,10 +74,15 @@ actor {
         List.toArray(messages)
     };
 
+    public shared func posts_by_id(id : Text) : async [Message]{
+        let canister : MyBlog = actor(id);
+        await canister.posts()
+    };
+
     public shared func timeline() : async [Message]{
         var all : List.List<Message> = List.nil();
         for(id in Iter.fromList(followed)){
-            let canister : MyBlog = actor(Principal.toText(id));
+            let canister : MyBlog = actor(id.principal);
             let msgs = await canister.posts();
             all := List.append(all, List.fromArray(msgs));
         };

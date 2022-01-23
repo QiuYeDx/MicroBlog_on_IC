@@ -1,0 +1,22 @@
+type Time = int;
+type Poster = 
+ record {
+   name: text;
+   "principal": text;
+ };
+type Message = 
+ record {
+   author: text;
+   content: text;
+   time: Time;
+ };
+service : {
+  follow: (text) -> ();
+  follows: () -> (vec Poster) query;
+  get_name: () -> (opt text);
+  post: (text) -> ();
+  posts: () -> (vec Message) query;
+  posts_by_id: (text) -> (vec Message);
+  set_name: (text) -> ();
+  timeline: () -> (vec Message);
+}

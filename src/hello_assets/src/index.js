@@ -11,10 +11,12 @@ async function post(){
   let text = textarea.value;
   await hello.post(text);
   post_button.disabled = false;
+  load_posts();
   textarea.value = "";
   flag = "myself";
 }
 var num_posts = 0;
+var flag_last = "myself";
 async function load_posts(){
   let posts_section = document.getElementById("posts");
   let posts;
@@ -23,7 +25,8 @@ async function load_posts(){
   }else{
     posts = await hello.posts_by_id(flag);
   }
-  if(num_posts == posts.length) return;
+  if(num_posts == posts.length && flag == flag_last) return;
+  flag_last = flag;
   posts_section.replaceChildren([]);
   num_posts = posts.length;
   let head = document.createElement("tr");
@@ -82,6 +85,7 @@ async function load_follows(){
     btn.onclick = () => {
       flag = follows[btn.getAttribute("i")].principal;
       flag_name = follows[btn.getAttribute("i")].name;
+      load_posts();
     };
     td_1.appendChild(btn);
     poster.appendChild(td_1);
@@ -95,11 +99,12 @@ function load(){
   let home_btn = document.getElementById("home");
   home_btn.onclick = ()=>{
     flag = "myself";
+    load_posts();
   };
   load_posts();
   load_follows();
-  setInterval(load_posts, 2500);
-  setInterval(load_follows, 4000);
+  setInterval(load_posts, 5000);
+  setInterval(load_follows, 10000);
 }
 
 window.onload = load;
